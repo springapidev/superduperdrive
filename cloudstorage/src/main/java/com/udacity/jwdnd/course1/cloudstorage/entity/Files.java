@@ -7,9 +7,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Files {
-    private Integer fileid;
+    private int fileId;
     private String filename;
     private String contenttype;
     private int userid;
-    private Blob filedata;
+    private byte[] filedata;
 }

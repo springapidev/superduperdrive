@@ -15,52 +15,46 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private LoggingAccessDeniedHandler accessDeniedHandler;
 
-    @Autowired
     private CustomAuthenticationProvider authProvider;
+
+    public SecurityConfig(CustomAuthenticationProvider authenticationProvider) {
+        this.authProvider = authenticationProvider;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-
     @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.authenticationProvider(authProvider);
+    protected void configure(AuthenticationManagerBuilder auth) {
+        auth.authenticationProvider(this.authProvider);
     }
 
     @Override
-    public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/css/**","/js/**");
-    }
-
     protected void configure(HttpSecurity http) throws Exception {
         http
+                .csrf().disable()
                 .headers().frameOptions().disable()
                 .and()
-                .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/h2-console/**","/login","/static/**","/signup","/login?logout")
+                .antMatchers("/signup", "/login", "/css/**", "/js/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
-                .and()
-                .formLogin()
-                .loginPage("/login")
-                .permitAll()
                 .and()
                 .logout()
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                .logoutSuccessUrl("/login?logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+                .logoutSuccessUrl("/login?logout");
+        ;
+        http.formLogin()
+                .loginPage("/login")
                 .permitAll()
-                .and()
-                .exceptionHandling()
-                .accessDeniedHandler(accessDeniedHandler);
-
+                .defaultSuccessUrl("/", true);
     }
 }

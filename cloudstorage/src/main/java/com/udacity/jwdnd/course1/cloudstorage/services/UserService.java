@@ -1,28 +1,33 @@
 package com.udacity.jwdnd.course1.cloudstorage.services;
 
-import com.udacity.jwdnd.course1.cloudstorage.entity.Users;
-import com.udacity.jwdnd.course1.cloudstorage.mapper.UsersMapper;
+import com.udacity.jwdnd.course1.cloudstorage.entity.User;
+import com.udacity.jwdnd.course1.cloudstorage.mapper.UserMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.UUID;
 
 @Service
-public class UserService implements UsersMapper {
+public class UserService implements UserMapper {
     @Resource
-    private UsersMapper usersMapper;
+    private UserMapper usersMapper;
+    @Autowired
+    private HashService hashService;
+
     @Override
-    public List<Users> findAll() {
+    public List<User> findAll() {
         return usersMapper.findAll();
     }
 
     @Override
-    public Users findById(long id) {
+    public User findById(long id) {
         return usersMapper.findById(id);
     }
 
     @Override
-    public Users findByUserName(String username) {
+    public User findByUserName(String username) {
         return usersMapper.findByUserName(username);
     }
 
@@ -32,12 +37,16 @@ public class UserService implements UsersMapper {
     }
 
     @Override
-    public int insert(Users users) {
+    public int insert(User users) {
+
+        users.setUserid(usersMapper.findAll().size()+1);
+        users.setSalt(UUID.randomUUID().toString());
+        users.setPassword(hashService.getHashedValue(users.getPassword(), users.getSalt()));
         return usersMapper.insert(users);
     }
 
     @Override
-    public int update(Users users) {
+    public int update(User users) {
         return usersMapper.update(users);
     }
 }

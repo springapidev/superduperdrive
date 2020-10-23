@@ -1,64 +1,44 @@
 package com.udacity.jwdnd.course1.cloudstorage.config;
 
-import com.udacity.jwdnd.course1.cloudstorage.entity.UserRole;
-import com.udacity.jwdnd.course1.cloudstorage.entity.Users;
-import com.udacity.jwdnd.course1.cloudstorage.mapper.UsersMapper;
+import com.udacity.jwdnd.course1.cloudstorage.entity.User;
+import com.udacity.jwdnd.course1.cloudstorage.mapper.UserMapper;
+import com.udacity.jwdnd.course1.cloudstorage.services.HashService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 
-@Component
+@Service
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-    @Resource
-    private UsersMapper usersMapper;
-
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private HashService hashService;
+    public CustomAuthenticationProvider(UserMapper userMapper, HashService hashService){
+        this.userMapper = userMapper;
+        this.hashService = hashService;
+    }
     @Override
-    public Authentication authenticate(final Authentication authentication) throws AuthenticationException {
-        final String username = authentication.getName();
-        final String password = authentication.getCredentials().toString();
-
-        final List<UserRole> userRoles = getUserIfAuthenticated(username, password);
-
-        return new UsernamePasswordAuthenticationToken(username, null, getGrantedAuthorities(userRoles));
-    }
-
-    private Collection<? extends GrantedAuthority> getGrantedAuthorities(final List<UserRole> userRoles) {
-        return userRoles
-                .stream()
-                .map(role -> (GrantedAuthority) role::getRole)
-                .collect(Collectors.toList());
-    }
-
-    private List<UserRole> getUserIfAuthenticated(final String username, final String password) {
-        final Users entity = usersMapper.findByUserName(username);
-
-        if (entity == null) {
-            throw new UsernameNotFoundException("Authentication failed");
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        String username = authentication.getName();
+        String password = authentication.getCredentials().toString();
+        User user = userMapper.findByUserName(username);
+        if(user != null){
+            String encodedSalt = user.getSalt();
+            String hashedPassword = hashService.getHashedValue(password, encodedSalt);
+            if(user.getPassword().equals(hashedPassword)){
+                return new UsernamePasswordAuthenticationToken(username, password, new ArrayList<>());
+            }
         }
-
-        if (!entity.getPassword().equals(password)) {
-            throw new UsernameNotFoundException("Authentication failed");
-        }
-
-        return null;//entity.getUserRoles();
+        return null;
     }
-
     @Override
-    public boolean supports(final Class<?> aClass) {
+    public boolean supports(Class<?> aClass) {
         return aClass.equals(UsernamePasswordAuthenticationToken.class);
     }
 }

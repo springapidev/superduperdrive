@@ -16,11 +16,14 @@
 
             <h1 class="display-5">Sign Up</h1>
             <form th:object="${users}" th:action="@{/signup}" method="POST">
-                <div class="alert alert-dark">
+                <div class="alert alert-dark" th:if="${successMsg}">
                     You successfully signed up! Please continue to the <a th:href="@{/login}">login</a> page.
                 </div>
-                <div class="alert alert-danger">
+                <div class="alert alert-danger" th:if="${errMsg}">
                     <span>Example Signup Error Message</span>
+                </div>
+                <div class="alert alert-danger" th:if="${alreadyExist}">
+                    <span>This username already exists, please try new one.</span>
                 </div>
                 <div class="form-row">
                     <div class="form-group col-md-6">
@@ -35,7 +38,7 @@
                 <div class="form-row">
                     <div class="form-group col-md-6">
                         <label for="inputUsername">Username</label>
-                        <input type="input" name="username" th:field="*{userName}" class="form-control" id="inputUsername" placeholder="Enter Username" maxlength="20" required>
+                        <input type="input" name="username" th:field="*{username}" class="form-control" id="inputUsername" placeholder="Enter Username" maxlength="20" required>
                     </div>
                     <div class="form-group col-md-6">
                         <label for="inputPassword">Password</label>

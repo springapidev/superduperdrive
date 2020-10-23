@@ -9,13 +9,12 @@ import java.util.List;
 @Getter
 @Setter
 @Component
-public class Users {
-    private int userid;;
-    private String userName;
+public class User {
+    private int userid;
+    private String username;
     private String salt;
     private String password;
     private String firstName;
     private String lastName;
-    private List<UserRole> roles;
 
   }
