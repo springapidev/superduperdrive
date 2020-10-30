@@ -6,10 +6,13 @@ import com.udacity.jwdnd.course1.cloudstorage.entity.Note;
 import com.udacity.jwdnd.course1.cloudstorage.services.*;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -100,6 +103,35 @@ public class HomeController {
         noteService.insert(note);
         model.addAttribute("successMsg", "Success");
         loadData(model);
+        return "redirect:/";
+    }
+
+    @GetMapping("/editnote/{noteid}")
+    @ResponseBody
+    public ResponseEntity<Note> vieweditNote(@PathVariable long noteid) {
+        try {
+            return new ResponseEntity<Note>(this.noteService.findById(noteid), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/editnote/{id}")
+    public String editNote(@Validated Note note, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("errMsg", "something wrong");
+            loadData(model);
+            return "home";
+        }
+        noteService.insert(note);
+        model.addAttribute("successMsg", "Success");
+        loadData(model);
+        return "redirect:/";
+    }
+
+    @GetMapping("/note-delete/{noteid}")
+    public String deleteNote(@PathVariable("noteid") int noteid) throws IOException {
+        noteService.deleteById(noteid);
         return "redirect:/";
     }
 
