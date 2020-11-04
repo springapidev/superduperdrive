@@ -12,6 +12,7 @@ public class Credentials {
     private String username;
     private String key;
     private String password;
+    private String secretkey;
     private int userid;
 
 }

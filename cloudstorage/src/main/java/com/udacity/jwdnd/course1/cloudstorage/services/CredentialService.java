@@ -52,6 +52,7 @@ public class CredentialService implements CredentialMapper {
 
     @Override
     public int update(Credentials credentials) {
+        credentials.setUserid(commonService.getUserId());
         return credentialMapper.update(credentials);
     }
 }

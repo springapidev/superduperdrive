@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS CREDENTIALS (
     username VARCHAR (30),
     key VARCHAR,
     password VARCHAR,
+    secretkey VARCHAR,
     userid INT,
     foreign key (userid) references USERS(userid)
 );

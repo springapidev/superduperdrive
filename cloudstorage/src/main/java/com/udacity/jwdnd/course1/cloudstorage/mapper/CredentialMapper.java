@@ -22,11 +22,11 @@ public interface CredentialMapper {
     @Delete("DELETE FROM credentials WHERE credentialid = #{credentialid}")
     public int deleteById(long credentialid);
 
-    @Insert("INSERT INTO credentials(credentialid,url, username , key,password, userid) " +
-            " VALUES (#{credentialid}, #{url}, #{username}, #{key},#{password}, #{userid})")
+    @Insert("INSERT INTO credentials(credentialid,url, username , key,password, secretkey, userid) " +
+            " VALUES (#{credentialid}, #{url}, #{username}, #{key},#{password},#{secretkey}, #{userid})")
     public int insert(Credentials credentials);
 
-    @Update("Update credentials set url=#{url}, username=#{username}," +
+    @Update("Update credentials set url=#{url}, username=#{username},key=#{key},secretkey=#{secretkey}," +
             " password=#{password} where credentialid=#{credentialid}")
     public int update(Credentials credentials);
 }

@@ -57,6 +57,9 @@ public class NoteService implements NoteMapper {
 
     @Override
     public int update(Note notes) {
-        return 0;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User user = userService.findByUserName(authentication.getName());
+        notes.setUserid(user.getUserid());
+        return noteMapper.update(notes);
     }
 }
