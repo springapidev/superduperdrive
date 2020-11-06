@@ -39,7 +39,7 @@ public class HomeController {
     @Autowired
     private CommonService commonService;
 
-    @GetMapping("/")
+    @RequestMapping("/")
     public String showHome(Model model) {
 //        Files files=new Files();
 //      if(filesService.findAll().size() > 0) {
