@@ -41,43 +41,39 @@ public class HomeController {
 
     @RequestMapping("/")
     public String showHome(Model model) {
-//        Files files=new Files();
-//      if(filesService.findAll().size() > 0) {
-//          files = filesService.findById(1);
-//       String photo = Base64.getEncoder().encodeToString(files.getFiledata());
-//          model.addAttribute("pic", photo);
-//      }
         loadData(model);
         return "home";
     }
 
     @PostMapping("/uploadfile")
     public String uploadfiles(@Validated Files files, @RequestParam("fileUpload") MultipartFile file, BindingResult result, Model model) {
-        if (result.hasErrors()) {
+        if (result.hasFieldErrors("filename")) {
             model.addAttribute("errMsg", "something wrong");
             loadData(model);
         }
-        Files files1 = filesService.findByFilename(file.getOriginalFilename());
-        if (files1 != null) {
-            model.addAttribute("fileAlreadyExists", "This file already exists!!!");
-            loadData(model);
-        } else {
             try {
-                files.setFileId(filesService.findAll().size() + 1);
-                files.setFilename(file.getOriginalFilename());
-                Path path = new File(file.getOriginalFilename()).toPath();
-                files.setContenttype(java.nio.file.Files.probeContentType(path));
-                files.setFiledata(file.getBytes());
-                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-                files.setUserid(service.findByUserName(auth.getName()).getUserid());
-                filesService.insert(files);
-                return "redirect:/";
+                Files files1 = filesService.findByFilename(file.getOriginalFilename());
+                if(files1 != null){
+                    model.addAttribute("errMsg", "This file is already exist!");
+                    loadData(model);
+                    return "redirect:/";
+                }else {
+                    files.setFileId(filesService.findAll().size() + 1);
+                    files.setFilename(file.getOriginalFilename());
+                    Path path = new File(file.getOriginalFilename()).toPath();
+                    files.setContenttype(java.nio.file.Files.probeContentType(path));
+                    files.setFiledata(file.getBytes());
+                    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                    files.setUserid(service.findByUserName(auth.getName()).getUserid());
+                    filesService.insert(files);
+                    model.addAttribute("successMsg", "Success");
+                    return "redirect:/";
+                }
             } catch (IOException ioException) {
                 System.out.println(ioException);
             }
-            model.addAttribute("successMsg", "Success");
             loadData(model);
-        }
+
         return "home";
     }
 
@@ -195,6 +191,13 @@ public class HomeController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    @GetMapping("/credential-delete/{credentialid}")
+    public String deleteCredentials(@PathVariable("credentialid") int credentialid) throws IOException {
+        credentialService.deleteById(credentialid);
+        return "redirect:/";
+    }
+
     private void loadData(Model model) {
         model.addAttribute("files", new Files());
         model.addAttribute("notes", new Note());

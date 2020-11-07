@@ -1,4 +1,5 @@
-create schema testdb;
+//create schema testdb;
+//CREATE SCHEMA IF NOT EXISTS testdb;
 CREATE TABLE IF NOT EXISTS USERS (
   userid INT PRIMARY KEY auto_increment,
   username VARCHAR(20),

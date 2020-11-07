@@ -1,31 +1,32 @@
 package com.udacity.jwdnd.course1.cloudstorage;
 
 
-import com.udacity.jwdnd.course1.cloudstorage.services.UserService;
+import com.udacity.jwdnd.course1.cloudstorage.entity.Credentials;
+import com.udacity.jwdnd.course1.cloudstorage.entity.Note;
+import com.udacity.jwdnd.course1.cloudstorage.pages.HomePage;
+import com.udacity.jwdnd.course1.cloudstorage.pages.LoginPage;
+import com.udacity.jwdnd.course1.cloudstorage.pages.SignUpPage;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.*;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.web.client.HttpClientErrorException;
-
-import java.io.IOException;
+import org.springframework.test.context.jdbc.Sql;
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+import static org.junit.jupiter.api.Assertions.*;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Sql(scripts = "classpath:drop_all.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(scripts = {"classpath:schema.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class CloudStorageApplicationTests {
 
     @LocalServerPort
     private int port;
+    private String baseURL;
 
     private WebDriver driver;
-
-    @Autowired
-    private UserService userService;
 
     @BeforeAll
     static void beforeAll() {
@@ -35,102 +36,299 @@ class CloudStorageApplicationTests {
     @BeforeEach
     public void beforeEach() {
         this.driver = new ChromeDriver();
+        baseURL = "http://localhost:" + port;
+
     }
 
     @AfterEach
-    public void afterEach() throws IOException {
+    public void afterEach() {
         if (this.driver != null) {
             driver.quit();
         }
     }
 
-    //	@Test
-//	public void getLoginPage() {
-//		driver.get("http://localhost:" + this.port + "/login");
-//		Assertions.assertEquals("Login", driver.getTitle());
-//	}
-    //1. Write Tests for User Signup, Login, and Unauthorized Access Restrictions.
-    @Test
-    public void signup() {
-        driver.get("http://localhost:8080/signup");
-        //find firstname, lastname, username and password
-        WebElement firstname = driver.findElement(By.name("firstName"));
-        WebElement lastname = driver.findElement(By.name("lastName"));
-        WebElement username = driver.findElement(By.name("username"));
-        WebElement password = driver.findElement(By.name("password"));
-        //set values for firstname, lastname, username and password
-        firstname.sendKeys("Md. Rajaul");
-        lastname.sendKeys("Islam");
-        username.sendKeys("admin");
-        password.sendKeys("admin");
-        driver.findElement(By.name("submit")).click();
-
-    }
 
     @Test
-    public void login() {
-        driver.get("http://localhost:8080/login");
-        //find username and password
-
-        WebElement username = driver.findElement(By.name("username"));
-        WebElement password = driver.findElement(By.name("password"));
-        //set values for username and password
-        username.sendKeys("admin");
-        password.sendKeys("admin");
-
-        driver.findElement(By.name("loginsubmit")).click();
-        String expectedPageTitle = "Home";
-        String actuatPageTitle = driver.getTitle();
-        if (expectedPageTitle.equalsIgnoreCase(actuatPageTitle)) {
-            System.out.println("successfully loggedIn");
-            try {
-                Thread.sleep(3000);
-                driver.findElement(By.id("logout")).click();
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println("Login Failed");
-        }
+    public void getLoginPage() {
+        driver.get(baseURL + "/login");
+        Assertions.assertEquals("Login", driver.getTitle());
     }
+
 
     @Test
-    public void verifyUnauthorizedAccessRestrictions() {
+    public void testInvalidUrlRedirectsToErrorPage() {
+        signUpAndLogin();
+        //navigate to invalid url
+        driver.get(baseURL + "/home/abc");
+        Assertions.assertEquals("Error", driver.getTitle());
+    }
 
-        try {
-            driver.get("http://localhost:8080/");
-        } catch (HttpClientErrorException.Unauthorized r) {
-            driver.get("http://localhost:8080/signup");
-            driver.get("http://localhost:8080/login");
-        }
+
+    @Test
+    public void testUnauthorizedUserCanOnlyAccessLoginAndSignUpPage() {
+        //navigate to home page and verify that unauthorized user has no access
+        driver.get(baseURL + "/home");
+        assertEquals("Login", driver.getTitle());
+
+        //navigate to sign up page and verify that unauthorized user has access
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.goToSignUp();
+        assertEquals("Sign Up", driver.getTitle());
+    }
+
+
+    @Test
+    public void testSignUpLoginVerifyHomePageIsAccessibleLogoutVerifyHomePageIsNotAccessible() {
+        signUpAndLogin();
+        //verify that home page is accessible
+        assertEquals("Home", driver.getTitle());
+
+        //log out
+        HomePage homePage = new HomePage(driver);
+        homePage.logout();
+
+        //verify that home page is no longer visible
+        assertFalse("Home".equalsIgnoreCase(driver.getTitle()));
+        assertEquals("Login", driver.getTitle());
 
     }
 
-    //2. Write Tests for Note Creation, Viewing, Editing, and Deletion.
-//    @Test
-//    public void createNoteAndVerifyItsViewing() {
-//        loginAvoidRepeat();
-//
-//            driver.get("http://localhost:8080/");
-//            driver.findElement(By.id("nav-notes-tab")).click();
-//            driver.findElement(By.id("btnshownote")).click();
-//            WebElement notetitle = driver.findElement(By.name("notetitle"));
-//            notetitle.sendKeys("Note Title");
-//            WebElement notedescription = driver.findElement(By.name("notedescription"));
-//            notedescription.sendKeys("Note Description");
-//            driver.findElement(By.id("notesave")).click();
-//
-//    }
 
+    /**
+     * Write a test that creates a note, and verifies it is displayed.
+     */
 
-    public void loginAvoidRepeat() {
-        driver.get("http://localhost:8080/login");
-        WebElement username = driver.findElement(By.name("username"));
-        WebElement password = driver.findElement(By.name("password"));
-        username.sendKeys("admin");
-        password.sendKeys("admin");
-        driver.findElement(By.name("loginsubmit")).click();
+    @Test
+    public void testSaveNoteAndVerifyItDisplayed() throws InterruptedException {
+        signUpAndLogin();
+
+        HomePage homePage = new HomePage(driver);
+
+        //create Note
+        String noteTitle = "How to complete This Project";
+        String noteDesc = "Write Test Code and Pass";
+
+        homePage.addNewNote(noteTitle, noteDesc);
+
+        //navigate to home page
+        driver.get(baseURL + "/");
+
+        //verify note creation
+        HomePage homePage1 = new HomePage(driver);
+        homePage1.goToNotesTab();
+
+        Note firstNote = homePage1.getFirstNote();
+        assertEquals(noteTitle, firstNote.getNotetitle());
+        assertTrue(noteDesc.equalsIgnoreCase(firstNote.getNotedescription()));
+    }
+
+    /**
+     * Write a test that edits an existing note and verifies that the changes are displayed.
+     */
+    @Test
+    public void testEditNoteAndVerifyChangesAreDisplayed() {
+        signUpAndLogin();
+
+        HomePage homePage = new HomePage(driver);
+
+        //create Note
+        String noteTitle = "How to Win a Coding Challange ";
+        String noteDesc = "Practice ";
+
+        homePage.addNewNote(noteTitle, noteDesc);
+
+        //navigate to home page
+        driver.get(baseURL + "/");
+
+        //edit note
+        String newNoteTitle = "How to Win a Coding Challange successfully";
+        String newNoteDesc = "Practice Practice Practice Practice";
+
+        homePage.editFirstNote(newNoteTitle, newNoteDesc);
+
+        //navigate to home page
+        driver.get(baseURL + "/");
+
+        //verify note update
+        HomePage homePage1 = new HomePage(driver);
+        homePage1.goToNotesTab();
+
+        Note firstNote = homePage1.getFirstNote();
+        assertEquals(newNoteTitle, firstNote.getNotetitle());
+        assertEquals(newNoteDesc, firstNote.getNotedescription());
+        assertFalse(noteTitle.equalsIgnoreCase(firstNote.getNotetitle()));
+        assertFalse(noteDesc.equalsIgnoreCase(firstNote.getNotedescription()));
 
     }
+
+    /**
+     * Write a test that deletes a note and verifies that the note is no longer displayed.
+     */
+    @Test
+    public void testDeleteNoteAndVerifyNoteIsNoLongerDisplayed() {
+        signUpAndLogin();
+
+        HomePage homePage = new HomePage(driver);
+
+        //create Note
+        String noteTitle = "How to play Ball";
+        String noteDesc = "It is not easy";
+
+        homePage.addNewNote(noteTitle, noteDesc);
+
+        //navigate to home page
+        driver.get(baseURL + "/");
+
+        //delete note
+        homePage.deleteFirstNote();
+
+        //navigate to home page
+        driver.get(baseURL + "/");
+
+        //verify note update
+        HomePage homePage1 = new HomePage(driver);
+        homePage1.goToNotesTab();
+
+        assertFalse(homePage1.isNoteTitleDisplayed());
+        assertFalse(homePage1.isNoteDescriptionDisplayed());
+    }
+
+    /**
+     * Write a test that creates a set of credentials,
+     * verifies that they are displayed,
+     * and verifies that the displayed password is encrypted.
+     */
+    @Test
+    public void testSaveCredentialAndVerifyItDisplayedAndPasswordIsEncrypted() {
+        signUpAndLogin();
+
+        HomePage homePage = new HomePage(driver);
+
+        //create credential
+        String url = "www.google.com";
+        String credentialUsername = "test";
+        String credentialPassword = "password";
+        String credentialKey = "786";
+        String credentialSecretKey = "1234";
+
+        homePage.addNewCredential(url, credentialUsername, credentialPassword, credentialKey,credentialSecretKey);
+
+        //navigate to home page
+        driver.get(baseURL + "/");
+
+        //verify credential creation
+        HomePage homePage1 = new HomePage(driver);
+        homePage1.goToCredentialsTab();
+
+        Credentials firstCredential = homePage1.getFirstCredential();
+
+        assertEquals(url, firstCredential.getUrl());
+        assertEquals(credentialUsername, firstCredential.getUsername());
+        assertFalse(credentialPassword.equalsIgnoreCase(firstCredential.getPassword()));
+    }
+
+    /**
+     * Write a test that views an existing set of credentials,
+     * verifies that the viewable password is unencrypted,
+     * edits the credentials, and verifies that the changes are displayed.
+     */
+    @Test
+    public void testSaveCredentialAndVerifyViewablePasswordIsEncryptedAndEditAndVerifyChangesAreDisplayed() throws InterruptedException {
+        signUpAndLogin();
+
+        HomePage homePage = new HomePage(driver);
+
+        //create credential
+        String url = "www.google.com";
+        String credentialUsername = "test";
+        String credentialPassword = "password";
+        String credentialKey = "786";
+        String credentialSecretKey = "1234";
+        homePage.addNewCredential(url, credentialUsername, credentialPassword, credentialKey,credentialSecretKey);
+
+
+        //navigate to home page
+        driver.get(baseURL + "/");
+        homePage.goToCredentialsTab();
+
+        Credentials credential = homePage.getCredentialModalInput();
+        //verify that password is unencrypted
+        assertEquals(credentialPassword, credential.getPassword());
+
+        //edit the credential
+        String newUrl = "www.udacity.com";
+        String newUsername = "admin";
+        String newPassword = "1234";
+        homePage.editFirstCredential(newUrl, newUsername, newPassword);
+
+
+        //navigate to home page
+        driver.get(baseURL + "/");
+
+        //verify note update
+        HomePage homePage1 = new HomePage(driver);
+        homePage1.goToCredentialsTab();
+
+        Credentials modifiedCredential = homePage1.getFirstCredential();
+        assertEquals(newUrl, modifiedCredential.getUrl());
+        assertEquals(newUsername, modifiedCredential.getUsername());
+        assertFalse(url.equalsIgnoreCase(modifiedCredential.getUrl()));
+        assertFalse(credentialUsername.equalsIgnoreCase(modifiedCredential.getUsername()));
+    }
+
+    /**
+     * Write a test that deletes an existing set of credentials
+     * and verifies that the credentials are no longer displayed.
+     */
+    @Test
+    public void testDeleteCredentialAndVerifyItIsNoLongerDisplayed() {
+        signUpAndLogin();
+
+        HomePage homePage = new HomePage(driver);
+
+        //create credential
+        String url = "www.google.com";
+        String credentialUsername = "test";
+        String credentialPassword = "password";
+        String credentialKey = "786";
+        String credentialSecretKey = "1234";
+
+        homePage.addNewCredential(url, credentialUsername, credentialPassword, credentialKey,credentialSecretKey);
+
+
+        //navigate to home page
+        driver.get(baseURL + "/home");
+        homePage.deleteFirstCredential();
+
+        //navigate to home page
+        driver.get(baseURL + "/home");
+
+        //verify note update
+        HomePage homePage1 = new HomePage(driver);
+        homePage1.goToCredentialsTab();
+
+        assertFalse(homePage1.isCredentialUrlDisplayed());
+        assertFalse(homePage1.isCredentialUsernameDisplayed());
+    }
+
+    private void signUpAndLogin() {
+        String firstName = "Rajaul";
+        String lastName = "Islam";
+        String username = "admin";
+        String password = "admin";
+
+        //navigate to sign up page
+        driver.get(baseURL + "/signup");
+        SignUpPage signUpPage = new SignUpPage(driver);
+        signUpPage.signUp(firstName, lastName, username, password);
+
+        //navigate to login page
+        driver.get(baseURL + "/login");
+
+        LoginPage loginPage = new LoginPage(driver);
+        loginPage.login(username, password);
+
+        driver.get(baseURL + "/");
+    }
+
 }
