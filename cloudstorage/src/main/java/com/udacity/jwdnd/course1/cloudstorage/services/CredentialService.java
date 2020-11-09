@@ -24,12 +24,14 @@ public class CredentialService implements CredentialMapper {
 
     @Override
     public List<Credentials> findAllByUsername(int userid) {
-        return credentialMapper.findAllByUsername(userid);
+             return credentialMapper.findAllByUsername(userid);
     }
 
     @Override
     public Credentials findById(long id) {
-        return credentialMapper.findById(id);
+        Credentials credentials=credentialMapper.findById(id);
+        credentials.setPassword(aesSecurityService.decrypt(credentials.getPassword(), credentials.getKey()));
+        return credentials;
     }
 
     @Override

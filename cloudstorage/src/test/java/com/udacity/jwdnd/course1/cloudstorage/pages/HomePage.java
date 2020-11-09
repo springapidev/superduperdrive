@@ -194,6 +194,7 @@ public class HomePage {
     }
     public void goToEditButton() {
         waitForVisibility(btnEditCredencialShow);
+
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnEditCredencialShow);
     }
     public void editFirstCredential(String url, String username, String password) {

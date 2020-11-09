@@ -1,11 +1,13 @@
 package com.udacity.jwdnd.course1.cloudstorage.entity;
 
-import java.sql.Blob;
+
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 @Getter
 @Setter
+@Component
 public class Credentials {
     private Integer credentialid;
     private String url;

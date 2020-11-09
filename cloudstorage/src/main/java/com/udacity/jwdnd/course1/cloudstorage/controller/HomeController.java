@@ -181,10 +181,10 @@ public class HomeController {
     public ResponseEntity<CredentialsDto> viewPassword(@PathVariable long credentialid) {
         System.out.println("HERE Credential");
         Credentials credentials = credentialService.findById(credentialid);
-        String decryptedPassword = AesSecurityService.decrypt(credentials.getPassword(),credentials.getKey());
+       // String decryptedPassword = AesSecurityService.decrypt(credentials.getPassword(),credentials.getKey());
         CredentialsDto credentialsDTO = new CredentialsDto();
         credentialsDTO.setSecretkey(credentials.getSecretkey());
-        credentialsDTO.setDecryptedpassword(decryptedPassword);
+        credentialsDTO.setDecryptedpassword(credentials.getPassword());
         try {
             return new ResponseEntity<CredentialsDto>(credentialsDTO, HttpStatus.OK);
         } catch (Exception e) {
