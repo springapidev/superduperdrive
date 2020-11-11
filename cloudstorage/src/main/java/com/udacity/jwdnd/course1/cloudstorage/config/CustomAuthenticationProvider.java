@@ -12,6 +12,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
+/**
+ * @Author Mohammad Rajaul Islam *
+ * @Since v.1.0
+ */
 @Service
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
@@ -19,10 +23,18 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
     private UserMapper userMapper;
     @Autowired
     private HashService hashService;
+
     public CustomAuthenticationProvider(UserMapper userMapper, HashService hashService){
         this.userMapper = userMapper;
         this.hashService = hashService;
     }
+
+    /**
+     *
+     * @param authentication
+     * @return
+     * @throws AuthenticationException
+     */
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName();
@@ -37,6 +49,12 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         }
         return null;
     }
+
+    /**
+     *
+     * @param aClass
+     * @return
+     */
     @Override
     public boolean supports(Class<?> aClass) {
         return aClass.equals(UsernamePasswordAuthenticationToken.class);

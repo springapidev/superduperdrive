@@ -11,6 +11,11 @@ import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.JavascriptExecutor;
+
+/**
+ * @Author Mohammad Rajaul Islam
+ * @Since v.1.0
+ */
 public class HomePage {
     private WebDriver driver;
     @FindBy(id = "logout")

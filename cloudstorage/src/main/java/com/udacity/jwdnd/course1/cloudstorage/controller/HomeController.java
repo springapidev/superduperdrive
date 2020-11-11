@@ -24,7 +24,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Base64;
-
+/**
+ * @Author Mohammad Rajaul Islam *
+ * @Since v.1.0
+ */
 @Controller
 public class HomeController {
     @Autowired
@@ -45,6 +48,14 @@ public class HomeController {
         return "home";
     }
 
+    /**
+     *
+     * @param files
+     * @param file
+     * @param result
+     * @param model
+     * @return
+     */
     @PostMapping("/uploadfile")
     public String uploadfiles(@Validated Files files, @RequestParam("fileUpload") MultipartFile file, BindingResult result, Model model) {
         if (result.hasFieldErrors("filename")) {
@@ -77,25 +88,39 @@ public class HomeController {
         return "home";
     }
 
+    /**
+     *
+     * @param id
+     * @param response
+     * @param model
+     * @throws IOException
+     */
     @GetMapping("/file/{id}")
     public void showFileImage(@PathVariable("id") int id,
                               HttpServletResponse response, Model model) throws IOException {
         Files files = filesService.findById(id);
-//        response.setContentType(files.getContenttype());
-//
-//        InputStream is = new ByteArrayInputStream(files.getFiledata());
-//        IOUtils.copy(is, response.getOutputStream());
-
         model.addAttribute("pic", Base64.getEncoder().encodeToString(files.getFiledata()));
-
     }
 
+    /**
+     *
+     * @param id
+     * @return
+     * @throws IOException
+     */
     @GetMapping("/deleteimage")
     public String deleteImage(@RequestParam("id") int id) throws IOException {
         filesService.deleteById(id);
         return "redirect:/";
     }
 
+    /**
+     *
+     * @param note
+     * @param result
+     * @param model
+     * @return
+     */
     @PostMapping("/savenote")
     public String saveNote(@Validated Note note, BindingResult result, Model model) {
         if (result.hasErrors()) {
@@ -109,7 +134,11 @@ public class HomeController {
         return "redirect:/";
     }
 
-
+    /**
+     *
+     * @param noteid
+     * @return
+     */
     @GetMapping("/editnote/{noteid}")
     @ResponseBody
     public ResponseEntity<Note> vieweditNote(@PathVariable long noteid) {
@@ -121,6 +150,15 @@ public class HomeController {
         }
     }
 
+    /**
+     *
+     * @param note
+     * @param result
+     * @param model
+     * @param redirectAttributes
+     * @param id
+     * @return
+     */
     @PostMapping("/editnote/{id}")
     public String editNote(@ModelAttribute Note note, BindingResult result, Model model, RedirectAttributes redirectAttributes, @PathVariable int id) {
         System.out.println("HERE II");
@@ -140,6 +178,13 @@ public class HomeController {
         return "redirect:/";
     }
 
+    /**
+     *
+     * @param credentials
+     * @param result
+     * @param model
+     * @return
+     */
     @PostMapping("/savecredentials")
     public String savecredential(@Validated Credentials credentials, BindingResult result, Model model) {
         if (result.hasErrors()) {
@@ -153,16 +198,32 @@ public class HomeController {
         }
         return "home";
     }
+
+    /**
+     *
+     * @param id
+     * @return
+     */
     @GetMapping("/editcredentials/{id}")
     @ResponseBody
     public ResponseEntity<Credentials> vieweditCredincials(@PathVariable long id) {
         System.out.println("editcredentials  HERE II");
         try {
-            return new ResponseEntity<Credentials>(this.credentialService.findById(id), HttpStatus.OK);
+            return new ResponseEntity<Credentials>(this.credentialService.findDecryptedCredentialById(id), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    /**
+     *
+     * @param credentials
+     * @param result
+     * @param model
+     * @param redirectAttributes
+     * @param id
+     * @return
+     */
     @PutMapping("/editcredentials/{id}")
     public String editCredintials(@Validated Credentials credentials, BindingResult result, Model model, RedirectAttributes redirectAttributes, @PathVariable int id) {
         System.out.println("HERE III");
@@ -176,15 +237,20 @@ public class HomeController {
         return "redirect:/";
     }
 
+    /**
+     *
+     * @param credentialid
+     * @return
+     */
     @GetMapping("/decrypt-password/{credentialid}")
     @ResponseBody
     public ResponseEntity<CredentialsDto> viewPassword(@PathVariable long credentialid) {
         System.out.println("HERE Credential");
         Credentials credentials = credentialService.findById(credentialid);
-       // String decryptedPassword = AesSecurityService.decrypt(credentials.getPassword(),credentials.getKey());
+        String decryptedPassword = AesSecurityService.decrypt(credentials.getPassword(),credentials.getKey());
         CredentialsDto credentialsDTO = new CredentialsDto();
         credentialsDTO.setSecretkey(credentials.getSecretkey());
-        credentialsDTO.setDecryptedpassword(credentials.getPassword());
+        credentialsDTO.setDecryptedpassword(decryptedPassword);
         try {
             return new ResponseEntity<CredentialsDto>(credentialsDTO, HttpStatus.OK);
         } catch (Exception e) {
@@ -192,12 +258,22 @@ public class HomeController {
         }
     }
 
+    /**
+     *
+     * @param credentialid
+     * @return
+     * @throws IOException
+     */
     @GetMapping("/credential-delete/{credentialid}")
     public String deleteCredentials(@PathVariable("credentialid") int credentialid) throws IOException {
         credentialService.deleteById(credentialid);
         return "redirect:/";
     }
 
+    /**
+     *
+     * @param model
+     */
     private void loadData(Model model) {
         model.addAttribute("files", new Files());
         model.addAttribute("notes", new Note());

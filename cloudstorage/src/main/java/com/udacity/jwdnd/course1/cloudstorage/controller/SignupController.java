@@ -14,12 +14,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.List;
-
+/**
+ * @Author Mohammad Rajaul Islam *
+ * @Since v.1.0
+ */
 @Controller
 public class SignupController {
     @Autowired
     private UserService service;
 
+    /**
+     *
+     * @param model
+     * @return
+     */
     @GetMapping("/signup")
     public String showSignup(Model model){
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -30,6 +38,14 @@ public class SignupController {
         model.addAttribute("users", new User());
         return "signup";
     }
+
+    /**
+     *
+     * @param users
+     * @param result
+     * @param model
+     * @return
+     */
     @PostMapping("/signup")
     public String signup(@Validated User users, BindingResult result, Model model){
         if(result.hasErrors()){

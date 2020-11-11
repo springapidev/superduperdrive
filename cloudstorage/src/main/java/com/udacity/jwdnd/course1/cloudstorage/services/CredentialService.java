@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
-
+/**
+ * @Author Mohammad Rajaul Islam
+ * @Since v.1.0
+ */
 @Service
 public class CredentialService implements CredentialMapper {
     @Autowired
@@ -29,9 +32,9 @@ public class CredentialService implements CredentialMapper {
 
     @Override
     public Credentials findById(long id) {
-        Credentials credentials=credentialMapper.findById(id);
-        credentials.setPassword(aesSecurityService.decrypt(credentials.getPassword(), credentials.getKey()));
-        return credentials;
+       // Credentials credentials=credentialMapper.findById(id);
+      //  credentials.setPassword(aesSecurityService.decrypt(credentials.getPassword(), credentials.getKey()));
+        return credentialMapper.findById(id);
     }
 
     @Override
@@ -55,6 +58,14 @@ public class CredentialService implements CredentialMapper {
     @Override
     public int update(Credentials credentials) {
         credentials.setUserid(commonService.getUserId());
+        credentials.setPassword(aesSecurityService.encrypt(credentials.getPassword(), credentials.getKey()));
         return credentialMapper.update(credentials);
+    }
+
+
+    public Credentials findDecryptedCredentialById(long id) {
+         Credentials credentials=credentialMapper.findById(id);
+          credentials.setPassword(aesSecurityService.decrypt(credentials.getPassword(), credentials.getKey()));
+        return credentials;
     }
 }

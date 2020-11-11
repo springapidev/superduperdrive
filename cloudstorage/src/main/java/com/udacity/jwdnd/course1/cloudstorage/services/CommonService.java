@@ -5,7 +5,10 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
+/**
+ * @Author Mohammad Rajaul Islam
+ * @Since v.1.0
+ */
 @Service
 public class CommonService {
     @Autowired

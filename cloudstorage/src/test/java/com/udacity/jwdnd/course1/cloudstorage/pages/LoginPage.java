@@ -6,7 +6,10 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
+/**
+ * @Author Mohammad Rajaul Islam
+ * @Since v.1.0
+ */
 public class LoginPage {
     private WebDriver driver;
 

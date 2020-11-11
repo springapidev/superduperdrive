@@ -183,7 +183,7 @@ class CloudStorageApplicationTests {
      * and verifies that the displayed password is encrypted.
      */
     @Test
-    public void testSaveCredentialAndVerifyItDisplayedAndPasswordIsEncrypted() {
+    public void testVerifyItDisplayedAndPasswordIsEncryptedAfterSaveCredential() {
         signUpAndLogin();
         HomePage homePage = new HomePage(driver);
         //create credential
@@ -205,10 +205,11 @@ class CloudStorageApplicationTests {
     /**
      * Write a test that views an existing set of credentials,
      * verifies that the viewable password is unencrypted,
+     * verifies that password is matched
      * edits the credentials, and verifies that the changes are displayed.
      */
     @Test
-    public void testSaveCredentialAndVerifyViewablePasswordIsEncryptedAndEditAndVerifyChangesAreDisplayed() throws InterruptedException {
+    public void testCredentialSaveAndVerifyViewablePasswordIsEncryptedAndVerifyChangesAreDisplayedAfterEdit() throws InterruptedException {
         signUpAndLogin();
         HomePage homePage = new HomePage(driver);
         //create credential

@@ -7,7 +7,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-
+/**
+ * @Author Mohammad Rajaul Islam
+ * @Since v.1.0
+ */
 @Mapper
 public interface FilesMapper {
 
