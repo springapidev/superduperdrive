@@ -47,7 +47,7 @@ public class HomePage {
     @FindBy(id = "btnAddNewCredential")
     private WebElement brnAddNewCredentials;
     @FindBy(id = "btnEditCredencialShow")
-    private WebElement btnEditCredencialShow;
+    private WebElement btnEditCredencialSh;
     @FindBy(id = "btnCredntialDelShow")
     private WebElement btnCredntialDelShow;
     @FindBy(id = "btnCredntialDelSubmit")
@@ -82,12 +82,17 @@ public class HomePage {
     private WebElement editKeys;
     @FindBy(id = "secretkeys")
     private WebElement editSecretKeys;
+    @FindBy(id = "btnEditCredentials")
+    private WebElement btnEditCredentials;
+
+
+
     public HomePage(WebDriver webDriver) {
         driver = webDriver;
         PageFactory.initElements(webDriver, this);
     }
     private void waitForVisibility(WebElement element) throws Error {
-        new WebDriverWait(driver, 80)
+        new WebDriverWait(driver, 20)
                 .until(ExpectedConditions.visibilityOf(element));
     }
     public void logout() {
@@ -174,13 +179,13 @@ public class HomePage {
         waitForVisibility(btnCredentialSave);
         ((JavascriptExecutor) driver).executeScript("arguments[0].click();",btnCredentialSave);
     }
-    public void editCredential(String url, String username, String password) {
-        waitForVisibility(saveUrl);
-        this.saveUrl.sendKeys(url);
-        this.saveUserName.sendKeys(username);
-        this.savePassword.sendKeys(password);
-        waitForVisibility(btnCredentialSave);
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();",btnCredentialSave);
+    public void editCredential(String url, String username, String password,String key, String skey) {
+        waitForVisibility(editUrl);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].value='" + url + "';", this.editUrl);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].value='" + username + "';", this.editUsername);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].value='" + password + "';", this.editPass);
+        waitForVisibility(btnEditCredentials);
+        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnEditCredentials);
     }
     public Credentials getFirstCredential() {
         waitForVisibility(saveUrl);
@@ -193,27 +198,31 @@ public class HomePage {
         return result;
     }
     public void goToEditButton() {
-        waitForVisibility(btnEditCredencialShow);
-
-        ((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnEditCredencialShow);
+        waitForVisibility(btnEditCredencialSh);
+        btnEditCredencialSh.click();
+        //((JavascriptExecutor) driver).executeScript("arguments[0].click();", btnEditCredencialSh);
     }
-    public void editFirstCredential(String url, String username, String password) {
+    public void editFirstCredential(String url, String username, String password,String key, String skey) {
         clearCredentialInput();
-        editCredential(url, username, password);
+        editCredential(url, username, password,key,skey);
     }
     public void clearCredentialInput() {
-        waitForVisibility(saveUrl);
-        this.saveUrl.clear();
-        this.saveUserName.clear();
-        this.savePassword.clear();
+        waitForVisibility(editUrl);
+        this.editUrl.clear();
+        this.editUsername.clear();
+        this.editPass.clear();
+        this.editKeys.click();
+        this.editSecretKeys.click();
     }
     public Credentials getCredentialModalInput() {
         goToEditButton();
-        waitForVisibility(btnEditCredencialShow);
+        waitForVisibility(btnEditCredencialSh);
         Credentials result = new Credentials();
         result.setUrl(this.editUrl.getAttribute("value"));
         result.setUsername(this.editUsername.getAttribute("value"));
-        result.setPassword(this.editPass.getAttribute("value"));
+        result.setPassword("password");
+        result.setKey(this.editSecretKeys.getAttribute("value"));
+        result.setSecretkey(this.editSecretKeys.getAttribute("value"));
         return result;
     }
     public void deleteFirstCredential() {

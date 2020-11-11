@@ -493,7 +493,7 @@
             let id = $(this).parent().find('#noteidedit').val();
             console.log(id + " is ID")
             $.ajax({
-                url: "http://localhost:8080/editnote/" + id
+                url: "/editnote/" + id
             }).then(function (data) {
                 console.log(data)
                 $('#noteModalEdit #noteid').val(data.noteid);
@@ -511,10 +511,10 @@
             Note.notedescription = notedescription;
             $.ajax({
                 type: "POST",
-                url: "http://localhost:8080/editnote/" + noteid,
+                url: "/editnote/" + noteid,
                 data: Note,
                 success: function () {
-                    window.location.href = "http://localhost:8080/"
+                    window.location.href = "/"
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     alert('failure');
@@ -528,7 +528,7 @@
             let id = $(this).parent().find('#credincialidedit').val();
             console.log(id + " is ID")
             $.ajax({
-                url: "http://localhost:8080/editcredentials/" + id
+                url: "/editcredentials/" + id
             }).then(function (data) {
                 console.log(data)
                 $('#credintialModalEdit #credentialid').val(data.credentialid);
@@ -555,10 +555,10 @@
             Credentials.secretkey = secretkey;
             $.ajax({
                 type: "PUT",
-                url: "http://localhost:8080/editcredentials/" + credentialid,
+                url: "/editcredentials/" + credentialid,
                 data: Credentials,
                 success: function () {
-                    window.location.href = "http://localhost:8080/"
+                    window.location.href = "/"
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
                     alert('failure');
@@ -574,7 +574,7 @@
             $('#showSubmit').on('click', function () {
                 let secretKey = $('#secret-key-input').val();
                 $.ajax({
-                    url: "http://localhost:8080/decrypt-password/" + id
+                    url: "/decrypt-password/" + id
                 }).then(function (data) {
                     console.log(data)
                     if (secretKey === data.secretkey) {

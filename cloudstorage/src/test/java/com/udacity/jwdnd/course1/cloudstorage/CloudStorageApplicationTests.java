@@ -210,47 +210,39 @@ class CloudStorageApplicationTests {
     @Test
     public void testSaveCredentialAndVerifyViewablePasswordIsEncryptedAndEditAndVerifyChangesAreDisplayed() throws InterruptedException {
         signUpAndLogin();
-
         HomePage homePage = new HomePage(driver);
-
         //create credential
         String url = "www.google.com";
         String credentialUsername = "test";
         String credentialPassword = "password";
         String credentialKey = "786";
         String credentialSecretKey = "1234";
-        homePage.addNewCredential(url, credentialUsername, credentialPassword, credentialKey,credentialSecretKey);
-
-
+        homePage.addNewCredential(url, credentialUsername, credentialPassword, credentialKey, credentialSecretKey);
         //navigate to home page
         driver.get(baseURL + "/");
         homePage.goToCredentialsTab();
-
         Credentials credential = homePage.getCredentialModalInput();
         //verify that password is unencrypted
         assertEquals(credentialPassword, credential.getPassword());
-
         //edit the credential
         String newUrl = "www.udacity.com";
         String newUsername = "admin";
         String newPassword = "1234";
-        homePage.editFirstCredential(newUrl, newUsername, newPassword);
-
-
+        String newKey= "34";
+        String newSecretKey = "44";
+        homePage.editFirstCredential(newUrl, newUsername, newPassword, newKey,newSecretKey);
         //navigate to home page
         driver.get(baseURL + "/");
-
         //verify note update
         HomePage homePage1 = new HomePage(driver);
         homePage1.goToCredentialsTab();
-
-        Credentials modifiedCredential = homePage1.getFirstCredential();
-        assertEquals(newUrl, modifiedCredential.getUrl());
-        assertEquals(newUsername, modifiedCredential.getUsername());
-        assertFalse(url.equalsIgnoreCase(modifiedCredential.getUrl()));
-        assertFalse(credentialUsername.equalsIgnoreCase(modifiedCredential.getUsername()));
+        WebElement credentialTab = driver.findElement(By.xpath("//a[@id='nav-credentials-tab']"));
+        assertThat(credentialTab.getText().contains(newUrl));
+        assertThat(credentialTab.getText().contains(newUsername));
+        assertThat(credentialTab.getText().contains(newPassword));
+        assertThat(credentialTab.getText().contains(newKey));
+        assertThat(credentialTab.getText().contains(newSecretKey));
     }
-
     /**
      * Write a test that deletes an existing set of credentials
      * and verifies that the credentials are no longer displayed.
